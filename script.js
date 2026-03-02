@@ -71,3 +71,69 @@
     });
   }
 })();
+
+  // =========================
+  // Carrusel reseñas
+  // =========================
+
+  function scrollCarousel(direction){
+    const carousel = document.getElementById("carousel");
+    if(!carousel) return;
+
+    const firstCard = carousel.querySelector(".review-card");
+    const gap = 18;
+    const step = firstCard
+      ? (firstCard.getBoundingClientRect().width + gap)
+      : 320;
+
+    carousel.scrollBy({ left: direction * step, behavior: "smooth" });
+  }
+
+  // 👇 IMPORTANTE: hacerla global
+  window.scrollCarousel = scrollCarousel;
+
+  (function initReviewsCarousel(){
+    const carousel = document.getElementById("carousel");
+    if(!carousel) return;
+
+    const prevBtn = document.querySelector(".carousel-nav.prev");
+    const nextBtn = document.querySelector(".carousel-nav.next");
+
+    function updateNav(){
+      const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+      if(prevBtn) prevBtn.disabled = carousel.scrollLeft <= 2;
+      if(nextBtn) nextBtn.disabled = carousel.scrollLeft >= maxScrollLeft - 2;
+    }
+
+    carousel.addEventListener("scroll", updateNav, { passive: true });
+    window.addEventListener("resize", updateNav);
+
+    carousel.addEventListener("keydown", (e) => {
+      if(e.key === "ArrowLeft") scrollCarousel(-1);
+      if(e.key === "ArrowRight") scrollCarousel(1);
+    });
+
+    updateNav();
+  })();
+  // =========================
+// Scroll to Top
+// =========================
+
+const scrollBtn = document.querySelector(".scroll-top");
+
+if(scrollBtn){
+  window.addEventListener("scroll", () => {
+    if(window.scrollY > 1200){
+      scrollBtn.classList.add("show");
+    } else {
+      scrollBtn.classList.remove("show");
+    }
+  });
+
+  scrollBtn.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });
+}
