@@ -31,6 +31,7 @@ $email    = trim((string)($_POST['email'] ?? ''));
 $telefono = trim((string)($_POST['telefono'] ?? ''));
 $mensaje  = trim((string)($_POST['mensaje'] ?? ''));
 
+// Honeypot anti-spam
 if ($website !== '') {
     http_response_code(400);
     echo json_encode([
@@ -40,6 +41,7 @@ if ($website !== '') {
     exit;
 }
 
+// Validaciones
 if (strlen($nombre) < 2) {
     http_response_code(422);
     echo json_encode([
@@ -77,22 +79,35 @@ if ($mensaje === '') {
 }
 
 try {
+
     $mail = new PHPMailer(true);
 
+    // CONFIGURACIÓN SMTP
     $mail->isSMTP();
-    $mail->Host = '127.0.0.1';
-    $mail->Port = 25;
-    $mail->SMTPAuth = false;
-    $mail->SMTPSecure = false;
+    $mail->Host       = 'dns118208.phdns25.es';
+    $mail->Port       = 587;
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'info@marcosbeltran.es';
+    $mail->Password   = 'TU_PASSWORD_REAL';
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->SMTPAutoTLS = true;
+
     $mail->CharSet = 'UTF-8';
     $mail->Timeout = 10;
 
+    // Remitente
     $mail->setFrom('info@marcosbeltran.es', 'Web marcosbeltran.es');
+
+    // Destinatario
     $mail->addAddress('info@marcosbeltran.es', 'Marcos Beltran');
+
+    // Reply del cliente
     $mail->addReplyTo($email, $nombre);
 
+    // Contenido
     $mail->isHTML(false);
     $mail->Subject = $subject;
+
     $mail->Body =
         "Nuevo formulario de contacto\n\n" .
         "Nombre: {$nombre}\n" .
@@ -107,8 +122,11 @@ try {
         'ok' => true,
         'message' => 'Mensaje enviado correctamente'
     ], JSON_UNESCAPED_UNICODE);
+
 } catch (Throwable $e) {
+
     http_response_code(500);
+
     echo json_encode([
         'ok' => false,
         'error' => 'No se pudo enviar el mensaje',
