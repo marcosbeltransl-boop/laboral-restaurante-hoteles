@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
+
 header('Content-Type: application/json; charset=utf-8');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['ok' => false, 'error' => 'Método no permitido']);
-    exit;
-}
+// Mostrar errores mientras depuras
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
 
 require_once __DIR__ . '/vendor/phpmailer/src/Exception.php';
 require_once __DIR__ . '/vendor/phpmailer/src/PHPMailer.php';
@@ -14,99 +15,113 @@ require_once __DIR__ . '/vendor/phpmailer/src/SMTP.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Honeypot
-$website = isset($_POST['website']) ? trim((string)$_POST['website']) : '';
-if ($website !== '') {
-    echo json_encode(['ok' => true]);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Método no permitido'
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// Campos
-$nombre   = isset($_POST['nombre']) ? trim((string)$_POST['nombre']) : '';
-$empresa  = isset($_POST['empresa']) ? trim((string)$_POST['empresa']) : '';
-$email    = isset($_POST['email']) ? trim((string)$_POST['email']) : '';
-$telefono = isset($_POST['telefono']) ? trim((string)$_POST['telefono']) : '';
-$mensaje  = isset($_POST['mensaje']) ? trim((string)$_POST['mensaje']) : '';
-$asunto   = isset($_POST['_subject']) ? trim((string)$_POST['_subject']) : 'Nuevo presupuesto';
+// Campos del formulario
+$subject  = trim((string)($_POST['_subject'] ?? 'Nuevo presupuesto'));
+$website  = trim((string)($_POST['website'] ?? ''));
+$nombre   = trim((string)($_POST['nombre'] ?? ''));
+$empresa  = trim((string)($_POST['empresa'] ?? ''));
+$email    = trim((string)($_POST['email'] ?? ''));
+$telefono = trim((string)($_POST['telefono'] ?? ''));
+$mensaje  = trim((string)($_POST['mensaje'] ?? ''));
 
-if (mb_strlen($nombre) < 2) {
+// Honeypot
+if ($website !== '') {
+    http_response_code(400);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Solicitud no válida'
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// Validaciones
+if (strlen($nombre) < 2) {
     http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Nombre inválido']);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Nombre inválido'
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Email inválido']);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Email inválido'
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 if ($telefono === '') {
     http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Teléfono requerido']);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Teléfono obligatorio'
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 if ($mensaje === '') {
     http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Mensaje requerido']);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Mensaje obligatorio'
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// SMTP REAL DEL BUZÓN
-$smtpHost = 'localhost';
-$smtpPort = 587;
-$smtpUser = 'info@marcosbeltran.es';
-$smtpPass = 'AQUI_LA_PASSWORD_REAL_DEL_CORREO';
-$smtpSecure = PHPMailer::ENCRYPTION_STARTTLS;
-
-// Si en tu Plesk el buzón usa SSL, cambia estas dos líneas por:
-// $smtpPort = 465;
-// $smtpSecure = PHPMailer::ENCRYPTION_SMTPS;
-
-$mailTo = 'info@marcosbeltran.es';
-$mailFrom = 'info@marcosbeltran.es';
-$mailFromName = 'Formulario web hostelería';
-
-$cuerpo  = "Nombre: {$nombre}\n";
-$cuerpo .= "Empresa: {$empresa}\n";
-$cuerpo .= "Email: {$email}\n";
-$cuerpo .= "Teléfono: {$telefono}\n\n";
-$cuerpo .= "Mensaje:\n{$mensaje}\n";
-
 try {
     $mail = new PHPMailer(true);
-    $mail->CharSet = 'UTF-8';
-    $mail->isSMTP();
-    $mail->Host = $smtpHost;
-    $mail->Port = $smtpPort;
-    $mail->SMTPAuth = true;
-    $mail->Username = $smtpUser;
-    $mail->Password = $smtpPass;
-    $mail->SMTPSecure = $smtpSecure;
-    $mail->SMTPAutoTLS = true;
-    $mail->Timeout = 15;
 
-    $mail->setFrom($mailFrom, $mailFromName);
-    $mail->addAddress($mailTo);
+    // SMTP
+    $mail->isSMTP();
+    $mail->Host       = 'localhost';
+    $mail->Port       = 587;
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'info@marcosbeltran.es';
+    $mail->Password   = 'YQPHiZ7m42ciCFh';
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+
+    $mail->CharSet = 'UTF-8';
+
+    // Remitente y destino
+    $mail->setFrom('info@marcosbeltran.es', 'Web marcosbeltran.es');
+    $mail->addAddress('info@marcosbeltran.es', 'Marcos Beltran');
     $mail->addReplyTo($email, $nombre);
 
-    $mail->Subject = $asunto;
-    $mail->Body = $cuerpo;
-    $mail->AltBody = $cuerpo;
+    // Contenido
     $mail->isHTML(false);
+    $mail->Subject = $subject;
+    $mail->Body =
+        "Nuevo formulario de contacto\n\n" .
+        "Nombre: {$nombre}\n" .
+        "Empresa: " . ($empresa !== '' ? $empresa : '-') . "\n" .
+        "Email: {$email}\n" .
+        "Teléfono: {$telefono}\n\n" .
+        "Mensaje:\n{$mensaje}\n";
 
     $mail->send();
 
-    echo json_encode(['ok' => true]);
-    exit;
+    echo json_encode([
+        'ok' => true,
+        'message' => 'Mensaje enviado correctamente'
+    ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'ok' => false,
-        'error' => 'SMTP',
-        'debug' => $mail->ErrorInfo
-    ]);
-    exit;
+        'error' => 'No se pudo enviar el mensaje',
+        'details' => $mail->ErrorInfo ?: $e->getMessage()
+    ], JSON_UNESCAPED_UNICODE);
 }
