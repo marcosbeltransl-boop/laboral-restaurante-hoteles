@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Mostrar errores mientras depuras
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
@@ -24,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Campos del formulario
 $subject  = trim((string)($_POST['_subject'] ?? 'Nuevo presupuesto'));
 $website  = trim((string)($_POST['website'] ?? ''));
 $nombre   = trim((string)($_POST['nombre'] ?? ''));
@@ -33,7 +31,6 @@ $email    = trim((string)($_POST['email'] ?? ''));
 $telefono = trim((string)($_POST['telefono'] ?? ''));
 $mensaje  = trim((string)($_POST['mensaje'] ?? ''));
 
-// Honeypot
 if ($website !== '') {
     http_response_code(400);
     echo json_encode([
@@ -43,7 +40,6 @@ if ($website !== '') {
     exit;
 }
 
-// Validaciones
 if (strlen($nombre) < 2) {
     http_response_code(422);
     echo json_encode([
@@ -83,23 +79,18 @@ if ($mensaje === '') {
 try {
     $mail = new PHPMailer(true);
 
-    // SMTP
     $mail->isSMTP();
-    $mail->Host       = 'localhost';
-    $mail->Port       = 587;
-    $mail->SMTPAuth   = true;
-    $mail->Username   = 'info@marcosbeltran.es';
-    $mail->Password   = 'YQPHiZ7m42ciCFh';
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-
+    $mail->Host = '127.0.0.1';
+    $mail->Port = 25;
+    $mail->SMTPAuth = false;
+    $mail->SMTPSecure = false;
     $mail->CharSet = 'UTF-8';
+    $mail->Timeout = 10;
 
-    // Remitente y destino
     $mail->setFrom('info@marcosbeltran.es', 'Web marcosbeltran.es');
     $mail->addAddress('info@marcosbeltran.es', 'Marcos Beltran');
     $mail->addReplyTo($email, $nombre);
 
-    // Contenido
     $mail->isHTML(false);
     $mail->Subject = $subject;
     $mail->Body =
@@ -116,12 +107,11 @@ try {
         'ok' => true,
         'message' => 'Mensaje enviado correctamente'
     ], JSON_UNESCAPED_UNICODE);
-
-} catch (Exception $e) {
+} catch (Throwable $e) {
     http_response_code(500);
     echo json_encode([
         'ok' => false,
         'error' => 'No se pudo enviar el mensaje',
-        'details' => $mail->ErrorInfo ?: $e->getMessage()
+        'details' => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
 }
