@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -11,7 +7,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// PHPMailer manual
 require_once __DIR__ . '/vendor/phpmailer/src/Exception.php';
 require_once __DIR__ . '/vendor/phpmailer/src/PHPMailer.php';
 require_once __DIR__ . '/vendor/phpmailer/src/SMTP.php';
@@ -58,30 +53,30 @@ if ($mensaje === '') {
     exit;
 }
 
-// Configuración SMTP
+// SMTP REAL DEL BUZÓN
 $smtpHost = 'localhost';
 $smtpPort = 587;
 $smtpUser = 'info@marcosbeltran.es';
-$smtpPass = 'PON_AQUI_LA_PASSWORD_DEL_CORREO';
+$smtpPass = 'AQUI_LA_PASSWORD_REAL_DEL_CORREO';
 $smtpSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
-// Destino
+// Si en tu Plesk el buzón usa SSL, cambia estas dos líneas por:
+// $smtpPort = 465;
+// $smtpSecure = PHPMailer::ENCRYPTION_SMTPS;
+
 $mailTo = 'info@marcosbeltran.es';
 $mailFrom = 'info@marcosbeltran.es';
-$mailFromName = 'Formulario web';
+$mailFromName = 'Formulario web hostelería';
 
-// Cuerpo
-$cuerpo = "";
-$cuerpo .= "Nombre: " . $nombre . "\n";
-$cuerpo .= "Empresa: " . $empresa . "\n";
-$cuerpo .= "Email: " . $email . "\n";
-$cuerpo .= "Teléfono: " . $telefono . "\n\n";
-$cuerpo .= "Mensaje:\n" . $mensaje . "\n";
+$cuerpo  = "Nombre: {$nombre}\n";
+$cuerpo .= "Empresa: {$empresa}\n";
+$cuerpo .= "Email: {$email}\n";
+$cuerpo .= "Teléfono: {$telefono}\n\n";
+$cuerpo .= "Mensaje:\n{$mensaje}\n";
 
 try {
     $mail = new PHPMailer(true);
     $mail->CharSet = 'UTF-8';
-
     $mail->isSMTP();
     $mail->Host = $smtpHost;
     $mail->Port = $smtpPort;
@@ -89,6 +84,8 @@ try {
     $mail->Username = $smtpUser;
     $mail->Password = $smtpPass;
     $mail->SMTPSecure = $smtpSecure;
+    $mail->SMTPAutoTLS = true;
+    $mail->Timeout = 15;
 
     $mail->setFrom($mailFrom, $mailFromName);
     $mail->addAddress($mailTo);
@@ -108,7 +105,8 @@ try {
     http_response_code(500);
     echo json_encode([
         'ok' => false,
-        'error' => 'Error SMTP: ' . $mail->ErrorInfo
+        'error' => 'SMTP',
+        'debug' => $mail->ErrorInfo
     ]);
     exit;
 }
