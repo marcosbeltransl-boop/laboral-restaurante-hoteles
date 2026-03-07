@@ -89,7 +89,7 @@ try {
     $mail->Timeout = 10;
 
     $mail->setFrom('info@marcosbeltran.es', 'Web marcosbeltran.es');
-    $mail->addAddress('abhermu@gmail.com', 'Antonio Abelardo Hernández Muñoz');
+    $mail->addAddress('info@marcosbeltran.es', 'Marcos Beltran');
     $mail->addReplyTo($email, $nombre);
 
     $mail->isHTML(false);
