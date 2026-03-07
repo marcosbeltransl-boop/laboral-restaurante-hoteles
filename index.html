@@ -542,7 +542,7 @@
 </label>
 <div class="form__head">
 <h3>Pedir Presupuesto</h3>
-<p class="muted">Te contactaremos a la brevedad.</p>
+<p class="muted">Te responderemos rápidamente.</p>
 </div>
 <label class="field">
 <span>Nombre</span>
@@ -574,7 +574,7 @@
 <input required="" type="checkbox"/>
 <span>Acepto la <a href="#" onclick="return false;">política de privacidad</a>.</span>
 </label>
-<button class="btn btn--primary btn--block" id="submitBtn" type="submit">Enviar consulta</button>
+<button class="btn btn--primary btn--block" id="submitBtn" type="submit">Enviar</button>
 <p aria-live="polite" class="form__note" id="formHint" role="status"></p>
 </form>
 </div>
@@ -808,6 +808,9 @@
       document.body.style.overflow = '';
     }
 
+    document.getElementById('formModalBackdrop').addEventListener('click', closeModal);
+    document.addEventListener('keydown', e => e.key === 'Escape' && closeModal());
+
     function resetButton() {
       btn.disabled = false;
       btn.textContent = 'Enviar';
@@ -903,5 +906,7 @@
         send({ event: ev });
       }, { capture: true });
     })();
-  })();</script></body>
+  })();</script>
+  
+</body>
 </html>
