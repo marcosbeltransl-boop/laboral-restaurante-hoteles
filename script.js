@@ -41,8 +41,8 @@
   if (year) year.textContent = new Date().getFullYear();
 
   // Form (demo)
-  const form = document.getElementById('quoteForm');
-  const note = document.getElementById('formNote');
+const form = document.getElementById('contactForm');
+const note = document.getElementById('formHint');
 
   const showNote = (msg, ok=false) => {
     if (!note) return;
@@ -55,24 +55,31 @@
       e.preventDefault();
 
       const data = new FormData(form);
-      const name = String(data.get('name') || '').trim();
-      const email = String(data.get('email') || '').trim();
-      const message = String(data.get('message') || '').trim();
-      const consent = form.querySelector('input[type="checkbox"]')?.checked;
+      
+     const nombre = String(data.get('nombre') || '').trim();
+const email = String(data.get('email') || '').trim();
+const telefono = String(data.get('telefono') || '').trim();
+const mensaje = String(data.get('mensaje') || '').trim();
+const consent = form.querySelector('input[type="checkbox"]')?.checked;
 
-      if (!name || !email || !message || !consent) {
-        showNote('Revisa los campos obligatorios y acepta la política de privacidad.');
-        return;
-      }
+if (!nombre || !email || !telefono || !mensaje || !consent) {
+  showNote('Revisa los campos obligatorios y acepta la política de privacidad.');
+  return;
+}
 
       // Demo: simular éxito (reemplaza por tu endpoint)
-      showNote('¡Listo! Hemos recibido tu solicitud. (Demo sin envío real)', true);
-      // Evento conversión GTM
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "formulario_enviado"
-     });
-      form.reset();
+showNote('¡Listo! Hemos recibido tu solicitud. (Demo sin envío real)', true);
+
+console.log('llego al submit correcto');
+console.log({ name, email, message, consent });
+
+// Evento conversión GTM
+window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({
+  event: "formulario_enviado"
+});
+
+form.reset();
     });
   }
 })();
