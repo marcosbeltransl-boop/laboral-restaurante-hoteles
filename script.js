@@ -67,6 +67,11 @@
 
       // Demo: simular éxito (reemplaza por tu endpoint)
       showNote('¡Listo! Hemos recibido tu solicitud. (Demo sin envío real)', true);
+      // Evento conversión GTM
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "formulario_enviado"
+     });
       form.reset();
     });
   }
