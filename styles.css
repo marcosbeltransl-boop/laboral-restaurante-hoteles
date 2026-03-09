@@ -834,6 +834,28 @@ h2{
   border-bottom:1px solid rgba(255,255,255,.12);
 }
 
+.btn-phone{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  padding:8px 16px;
+
+  border:2px solid currentColor;
+  border-radius:10px;
+
+  color:inherit;
+  text-decoration:none;
+  font-weight:600;
+  font-size:14px;
+
+  transition:all .25s ease;
+}
+
+.btn-phone:hover{
+  background:rgba(255,255,255,0.1);
+}
+
 .form{
   border-radius: var(--radius2);
   border:3px solid rgba(255,255,255,.12);
@@ -1634,4 +1656,14 @@ textarea:-webkit-autofill{
 #formModalClose:hover{
   background:rgba(255,255,255,.15);
   border-color:rgba(255,255,255,.24);
+}
+
+@media (max-width: 768px){
+
+  .btn-phone{
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
 }
