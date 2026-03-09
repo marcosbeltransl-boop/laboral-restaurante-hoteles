@@ -67,11 +67,8 @@ if (!nombre || !email || !telefono || !mensaje || !consent) {
   return;
 }
 
-      // Demo: simular éxito (reemplaza por tu endpoint)
+// Demo: simular éxito (reemplaza por tu endpoint)
 showNote('¡Listo! Hemos recibido tu solicitud. (Demo sin envío real)', true);
-
-console.log('llego al submit correcto');
-console.log({ name, email, message, consent });
 
 // Evento conversión GTM
 window.dataLayer = window.dataLayer || [];
