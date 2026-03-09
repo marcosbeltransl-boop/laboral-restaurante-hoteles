@@ -40,46 +40,58 @@
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
 
-  // Form (demo)
-const form = document.getElementById('contactForm');
-const note = document.getElementById('formHint');
+   // Form
+  const form = document.getElementById('contactForm');
+  const note = document.getElementById('formHint');
 
-  const showNote = (msg, ok=false) => {
+  const showNote = (msg, ok = false) => {
     if (!note) return;
     note.textContent = msg;
     note.style.color = ok ? 'rgba(255,255,255,.9)' : 'rgba(255,200,180,.95)';
   };
 
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const data = new FormData(form);
-      
-     const nombre = String(data.get('nombre') || '').trim();
-const email = String(data.get('email') || '').trim();
-const telefono = String(data.get('telefono') || '').trim();
-const mensaje = String(data.get('mensaje') || '').trim();
-const consent = form.querySelector('input[type="checkbox"]')?.checked;
+      const nombre = String(data.get('nombre') || '').trim();
+      const email = String(data.get('email') || '').trim();
+      const telefono = String(data.get('telefono') || '').trim();
+      const mensaje = String(data.get('mensaje') || '').trim();
+      const consent = form.querySelector('input[type="checkbox"]')?.checked;
 
-if (!nombre || !email || !telefono || !mensaje || !consent) {
-  showNote('Revisa los campos obligatorios y acepta la política de privacidad.');
-  return;
-}
+      if (!nombre || !email || !telefono || !mensaje || !consent) {
+        showNote('Revisa los campos obligatorios y acepta la política de privacidad.');
+        return;
+      }
 
-// Demo: simular éxito (reemplaza por tu endpoint)
-showNote('¡Listo! Hemos recibido tu solicitud. (Demo sin envío real)', true);
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: data
+        });
 
-// Evento conversión GTM
-window.dataLayer = window.dataLayer || [];
-window.dataLayer.push({
-  event: "formulario_enviado"
-});
+        const json = await res.json();
 
-form.reset();
+        if (json.ok) {
+          showNote('¡Listo! Hemos recibido tu solicitud.', true);
+
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: 'formulario_enviado'
+          });
+
+          form.reset();
+        } else {
+          showNote(json.error || 'No se pudo enviar el formulario.');
+        }
+      } catch (error) {
+        console.error(error);
+        showNote('Error de conexión. Inténtalo de nuevo.');
+      }
     });
   }
-})();
 
   // =========================
   // Carrusel reseñas
