@@ -77,6 +77,8 @@
         if (json.ok) {
           showNote('¡Listo! Hemos recibido tu solicitud.', true);
 
+          console.log("Se dispara formulario_enviado");
+
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push({
             event: 'formulario_enviado'
@@ -158,3 +160,5 @@ if(scrollBtn){
     });
   });
 }
+
+})();
