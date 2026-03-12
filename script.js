@@ -40,9 +40,7 @@
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
 
-    // Formulario desactivado aquí para evitar doble envío.
-  // La lógica activa del submit está en el script inline del HTML (modal). 
-  /* // Form
+   // Form
   const form = document.getElementById('contactForm');
   const note = document.getElementById('formHint');
 
@@ -95,7 +93,7 @@
         showNote('Error de conexión. Inténtalo de nuevo.');
       }
     });
-  } */
+  }
 
   // =========================
   // Carrusel reseñas
