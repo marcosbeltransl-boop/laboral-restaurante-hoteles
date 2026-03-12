@@ -801,7 +801,14 @@ bordado o estampado. Te enviaremos opciones y presupuesto en breve.
     <button class="modal__close" id="formModalClose" type="button" aria-label="Cerrar modal">×</button>
   </div>
 </div>
-</div><script>(function () {
+</div>
+<!-- 
+Este script gestiona el envío real del formulario y abre el modal de éxito/error.
+No duplicar esta lógica en script.js porque provocaría dos peticiones a envio.php
+y se enviarían 2 correos.
+-->
+<script>
+(function () {
     var form = document.getElementById('contactForm');
     var btn = document.getElementById('submitBtn');
     var hint = document.getElementById('formHint');
@@ -871,27 +878,33 @@ bordado o estampado. Te enviaremos opciones y presupuesto en breve.
         body: data,
         headers: { Accept: 'application/json' }
       })
-        .then(function (res) {
-          if (res.ok) {
-            form.reset();
-            openModal(true);
-          } else {
-            res.json().then(function (err) {
-              console.warn('Error del servidor:', res.status, err);
-            }).catch(function () {});
-            openModal(false);
-            /* En error no se hace form.reset(): se mantienen los datos para que el usuario pueda reintentar */
-          }
-        })
-        .catch(function (err) {
-          console.warn('Error al enviar el formulario:', err);
-          openModal(false);
-          /* En error no se hace form.reset(): se mantienen los datos */
-        })
-        .finally(function () {
-          resetButton();
-        });
+ .then(function (res) {
+  if (res.ok) {
+    form.reset();
+
+    // Evento para Google Tag Manager
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'formulario_enviado'
     });
+
+    openModal(true);
+  } else {
+    res.json().then(function (err) {
+      console.warn('Error del servidor:', res.status, err);
+    }).catch(function () {});
+    openModal(false);
+    /* En error no se hace form.reset(): se mantienen los datos para que el usuario pueda reintentar */
+  }
+})
+.catch(function (err) {
+  console.warn('Error al enviar el formulario:', err);
+  openModal(false);
+  /* En error no se hace form.reset(): se mantienen los datos */
+})
+.finally(function () {
+  resetButton();
+});
 
     // Tracking CTAs (server-side log en track.php). No bloquea navegación.
     (function () {
