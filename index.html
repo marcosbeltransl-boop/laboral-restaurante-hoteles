@@ -801,7 +801,8 @@ bordado o estampado. Te enviaremos opciones y presupuesto en breve.
     <button class="modal__close" id="formModalClose" type="button" aria-label="Cerrar modal">×</button>
   </div>
 </div>
-</div><script>(function () {
+</div>
+<script>(function () {
     var form = document.getElementById('contactForm');
     var btn = document.getElementById('submitBtn');
     var hint = document.getElementById('formHint');
@@ -818,7 +819,7 @@ bordado o estampado. Te enviaremos opciones y presupuesto en breve.
       modal.setAttribute('aria-hidden', 'false');
       modal.classList.add('modal--open');
       document.body.style.overflow = 'hidden';
-      modalClose.focus();
+      if (modalClose) modalClose.focus();
     }
 
     function closeModal() {
@@ -827,8 +828,9 @@ bordado o estampado. Te enviaremos opciones y presupuesto en breve.
       document.body.style.overflow = '';
     }
 
-    document.getElementById('formModalBackdrop').addEventListener('click', closeModal);
-    document.addEventListener('keydown', e => e.key === 'Escape' && closeModal());
+   document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeModal();
+});
 
     function resetButton() {
       btn.disabled = false;
@@ -872,10 +874,15 @@ bordado o estampado. Te enviaremos opciones y presupuesto en breve.
         headers: { Accept: 'application/json' }
       })
         .then(function (res) {
-          if (res.ok) {
-            form.reset();
-            openModal(true);
-          } else {
+  if (res.ok) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'lead_formulario'
+    });
+
+    form.reset();
+    openModal(true);
+  } else {
             res.json().then(function (err) {
               console.warn('Error del servidor:', res.status, err);
             }).catch(function () {});
